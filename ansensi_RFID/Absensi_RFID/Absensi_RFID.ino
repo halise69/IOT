@@ -1,4 +1,4 @@
-//SDA -> D2
+   //SDA -> D2
 //SCK -> D5
 //MOSI -> D7
 //MISO -> D6
@@ -12,7 +12,7 @@
 
 const char* ssid     = "BUKAN_WIFI_GRATIS";
 const char* password = "cekditoiletbro12345";
-String url = "http://192.168.1.4/absen/absenrfid?uid=";
+String url = "http://192.168.1.2/absen/absenrfid?uid=";
 
 #define RST_PIN D4
 #define SS_PIN  D2
@@ -51,26 +51,26 @@ String logToServer(unsigned long cardUID) {
   if (httpCode > 0) {
     Serial.printf("[HTTP] GET... code: %d\n", httpCode);
 
-    if (httpCode == HTTP_CODE_OK) {
-      String payload = http.getString();
+    if (httpCode == HTTP_CODE_TEMPORARY_REDIRECT) {
 
-      Serial.println(payload);
-
-      if (payload == "Ok!") {
-
-        for (int i = 0; i < 3; i++) {
-          digitalWrite(D0, HIGH);
-          digitalWrite(D1, HIGH);
-          delay(100);
-          digitalWrite(D0, LOW);
-          digitalWrite(D1, LOW);
-          delay(100);
+      Serial.print("berhasil");
+  
+        for (int i = 0; i < 1; i++) {
+            Serial.println("HIGH");
+            digitalWrite(D3, HIGH);
+            digitalWrite(D0, HIGH);
+            digitalWrite(D4, HIGH);
+            delay(500);
+            Serial.println("LOW");
+            digitalWrite(D3, LOW);
+            digitalWrite(D0, LOW);
+            digitalWrite(D4, LOW);
+            delay(500);
         }
-
-      }
     }
   } else {
     Serial.printf("[HTTP] GET... failed, error: %s\n", http.errorToString(httpCode).c_str());
+    Serial.print("gagal");
   }
 
   http.end();
@@ -80,6 +80,7 @@ String logToServer(unsigned long cardUID) {
 void setup() {
   pinMode(D0, OUTPUT);
   pinMode(D1, OUTPUT);
+  pinMode(D3, OUTPUT);
   Serial.begin(115200);
   Serial.println("");
   delay(1000);
@@ -141,21 +142,18 @@ void loop() {
     digitalWrite(D0, LOW);
     delay(100);
   }
-
   if (cardUID == -1) {
     Serial.println("Failed to get UID");
     return;
   }
 
   Serial.printf("\nCard UID is %u\n", cardUID);
-
   for (int i = 0; i < 3; i++) {
     digitalWrite(D1, HIGH);
     delay(250);
     digitalWrite(D1, LOW);
     delay(250);
   }
-
   logToServer(cardUID);
 
   wait = 51;
